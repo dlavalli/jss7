@@ -1135,6 +1135,8 @@ public class MAPParameterFactoryImpl implements MAPParameterFactory {
         return new AnyTimeInterrogationResponseImpl(subscriberInfo, extensionContainer);
     }
 
+    // DANIEL ... Should I add something here ???  
+
     public DiameterIdentity createDiameterIdentity(byte[] data) {
         return new DiameterIdentityImpl(data);
     }

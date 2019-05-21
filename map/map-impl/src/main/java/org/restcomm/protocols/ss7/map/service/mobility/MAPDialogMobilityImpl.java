@@ -149,6 +149,8 @@ import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.Any
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeInterrogationResponseImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeSubscriptionInterrogationRequestImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeSubscriptionInterrogationResponseImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeModificationRequestImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeModificationResponseImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.ProvideSubscriberInfoRequestImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.ProvideSubscriberInfoResponseImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberManagement.DeleteSubscriberDataRequestImpl;
@@ -751,6 +753,128 @@ public class MAPDialogMobilityImpl extends MAPDialogImpl implements MAPDialogMob
         }
     }
 
+    public long void addAnyTimeModificationRequest(SubscriberIdentity subscriberIdentity, ISDNAddressString gsmSCFAddress, boolean isLongFTNSupported,
+            ModificationRequestForCFInfo mrfCFInfo, ModificationRequestForCBInfo mrfCBInfo, ModificationRequestForCSI mrfCSI,
+            ModificationRequestForODBdata mrfODBdata, ModificationRequestForIPSMGWData mrfIPSMGWData, RequestedServingNode activationReqForUEreachability,
+            ModificationRequestForCSG mrfCSG, ModificationRequestForCWInfo mrfCWInfo, ModificationRequestForCLIPInfo mrfCLIPInfo,
+            ModificationRequestForCLIRInfo mrfCLIRInfo, ModificationRequestForCHInfo mrfCHInfo, ModificationRequestForECTInfo mrfECTInfo,
+            MAPExtensionContainer extensionContainer) throws MAPException {
+
+        return this.addAnyTimeModificationRequest(_Timer_Default, subscriberIdentity, gsmSCFAddress, isLongFTNSupported, mrfCFInfo, mrfCBInfo, mrfCSI,
+                                                  mrfODBdata, mrfIPSMGWData, activationReqForUEreachability, mrfCSG, mrfCWInfo, mrfCLIPInfo,
+                                                  mrfCLIRInfo, mrfCHInfo, mrfECTInfo, extensionContainer);
+    }
+
+    public long addAnyTimeModificationRequest(int customTimeout, SubscriberIdentity subscriberIdentity, ISDNAddressString gsmSCFAddress, 
+            boolean isLongFTNSupported, ModificationRequestForCFInfo mrfCFInfo, ModificationRequestForCBInfo mrfCBInfo, ModificationRequestForCSI mrfCSI,
+            ModificationRequestForODBdata mrfODBdata, ModificationRequestForIPSMGWData mrfIPSMGWData, RequestedServingNode activationReqForUEreachability,
+            ModificationRequestForCSG mrfCSG, ModificationRequestForCWInfo mrfCWInfo, ModificationRequestForCLIPInfo mrfCLIPInfo,
+            ModificationRequestForCLIRInfo mrfCLIRInfo, ModificationRequestForCHInfo mrfCHInfo, ModificationRequestForECTInfo mrfECTInfo,
+            MAPExtensionContainer extensionContainer) throws MAPException {
+
+        if ((this.appCntx.getApplicationContextName()    != MAPApplicationContextName.anyTimeInfoHandlingContext) ||
+            (this.appCntx.getApplicationContextVersion() != MAPApplicationContextVersion.version3))
+            throw new MAPException(
+                "Bad application context name for AnyTimeModificationRequest: must be anyTimeInfoHandlingContext_V3");
+
+        Invoke invoke = this.mapProviderImpl.getTCAPProvider().getComponentPrimitiveFactory().createTCInvokeRequest();
+        if (customTimeout == _Timer_Default)
+            invoke.setTimeout(getMediumTimer());
+        else
+            invoke.setTimeout(customTimeout);
+
+        // Operation Code
+        OperationCode oc = TcapFactory.createOperationCode();
+        oc.setLocalOperationCode((long) MAPOperationCode.anyTimeModification);
+        invoke.setOperationCode(oc);
+
+        AnyTimeModificationRequestImpl req = new AnyTimeModificationRequestImpl(subscriberIdentity, gsmSCFAddress, isLongFTNSupported,
+                            mrfCFInfo, mrfCBInfo, mrfCSI, mrfODBdata, mrfIPSMGWData, activationReqForUEreachability, mrfCSG, 
+                            mrfCWInfo, mrfCLIPInfo, mrfCLIRInfo, mrfCHInfo, mrfECTInfo,extensionContainer);
+        AsnOutputStream aos = new AsnOutputStream();
+        req.encodeData(aos);
+
+        Parameter p = this.mapProviderImpl.getTCAPProvider().getComponentPrimitiveFactory().createParameter();
+        p.setTagClass(req.getTagClass());
+        p.setPrimitive(req.getIsPrimitive());
+        p.setTag(req.getTag());
+        p.setData(aos.toByteArray());
+        invoke.setParameter(p);
+
+        Long invokeId;
+        try {
+            invokeId = this.tcapDialog.getNewInvokeId();
+            invoke.setInvokeId(invokeId);
+        } catch (TCAPException e) {
+            throw new MAPException(e.getMessage(), e);
+        }
+
+        this.sendInvokeComponent(invoke);
+
+        return invokeId;
+    }
+
+    public void addAnyTimeModificationResponse(ExtSSInfoForCSE ssInfoForCSE, CAMELSubscriptionInfo camelSubscriptionInfo, ODBInfo odbInfo,
+            CallWaitingData callWaitingData, CallHoldData callHoldData, ClipData clipData, ClirData clirData,
+            EctData ectData, AddressString serviceCentreAddress, MAPExtensionContainer extensionContainer) throws MAPException {
+
+        return this.doAddAnyTimeModificationResponse_NonLast(false, ssInfoForCSE, camelSubscriptionInfo, odbInfo, callWaitingData, 
+                                                             callHoldData, clipData, clirData, ectData, serviceCentreAddress, extensionContainer)
+    }
+
+    public void addAnyTimeModificationResponse_NonLast(ExtSSInfoForCSE ssInfoForCSE, CAMELSubscriptionInfo camelSubscriptionInfo, ODBInfo odbInfo,
+            CallWaitingData callWaitingData, CallHoldData callHoldData, ClipData clipData, ClirData clirData,
+            EctData ectData, AddressString serviceCentreAddress, MAPExtensionContainer extensionContainer) throws MAPException {
+
+        return this.doAddAnyTimeModificationResponse_NonLast(true, ssInfoForCSE, camelSubscriptionInfo, odbInfo, callWaitingData, 
+                                                             callHoldData, clipData, clirData, ectData, serviceCentreAddress, extensionContainer)
+    }
+
+    protected void doAddAnyTimeModificationResponse_NonLast(boolean nonLast, ExtSSInfoForCSE ssInfoForCSE, CAMELSubscriptionInfo camelSubscriptionInfo, 
+            ODBInfo odbInfo, CallWaitingData callWaitingData, CallHoldData callHoldData, ClipData clipData, ClirData clirData,
+            EctData ectData, AddressString serviceCentreAddress, MAPExtensionContainer extensionContainer) throws MAPException {
+
+        if ((this.appCntx.getApplicationContextName()    != MAPApplicationContextName.anyTimeInfoHandlingContext) ||
+            (this.appCntx.getApplicationContextVersion() != MAPApplicationContextVersion.version3))
+            throw new MAPException(
+                "Bad application context name for AnyTimeModificationResponse: must be anyTimeInfoHandlingContext_V3");
+
+        AnyTimeModificationResponseImpl resp = new AnyTimeModificationResponseImpl(ssInfoForCSE, camelSubscriptionInfo, odbInfo, 
+            callWaitingData, callHoldData, clipData, clirData, ectData, serviceCentreAddress, extensionContainer);
+        AsnOutputStream aos = new AsnOutputStream();
+        resp.encodeData(aos);
+
+        // Operation Code
+        OperationCode oc = this.mapProviderImpl.getTCAPProvider().getComponentPrimitiveFactory().createOperationCode();
+        oc.setLocalOperationCode((long) MAPOperationCode.anyTimeModification);
+
+        Parameter p = this.mapProviderImpl.getTCAPProvider().getComponentPrimitiveFactory().createParameter();
+        p.setTagClass(resp.getTagClass());
+        p.setPrimitive(resp.getIsPrimitive());
+        p.setTag(resp.getTag());
+        p.setData(aos.toByteArray());
+
+        if (nonLast) {
+            ReturnResult resultNonLast = this.mapProviderImpl.getTCAPProvider().getComponentPrimitiveFactory().createTCResultRequest();
+
+            resultNonLast.setInvokeId(invokeId);
+
+            resultNonLast.setOperationCode(oc);
+            resultNonLast.setParameter(p);
+
+            this.sendReturnResultComponent(resultNonLast);
+        } else {
+            ReturnResultLast resultLast = this.mapProviderImpl.getTCAPProvider().getComponentPrimitiveFactory().createTCResultLastRequest();
+
+            resultLast.setInvokeId(invokeId);
+
+            resultLast.setOperationCode(oc);
+            resultLast.setParameter(p);
+
+            this.sendReturnResultLastComponent(resultLast);
+        }
+    }
+ 
     @Override
     public long addProvideSubscriberInfoRequest(IMSI imsi, LMSI lmsi, RequestedInfo requestedInfo, MAPExtensionContainer extensionContainer,
             EMLPPPriority callPriority) throws MAPException {

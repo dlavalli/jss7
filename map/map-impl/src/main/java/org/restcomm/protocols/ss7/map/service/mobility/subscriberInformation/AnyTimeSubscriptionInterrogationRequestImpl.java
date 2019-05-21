@@ -65,7 +65,7 @@ public class AnyTimeSubscriptionInterrogationRequestImpl extends MobilityMessage
     }
 
     public AnyTimeSubscriptionInterrogationRequestImpl(SubscriberIdentity subscriberIdentity, RequestedSubscriptionInfo requestedSubscriptionInfo,
-            ISDNAddressString gsmSCFAddress, MAPExtensionContainer mapExtensionContainer, boolean isLongFTNSupported) {
+        ISDNAddressString gsmSCFAddress, MAPExtensionContainer mapExtensionContainer, boolean isLongFTNSupported) {
         this.subscriberIdentity = subscriberIdentity;
         this.requestedSubscriptionInfo = requestedSubscriptionInfo;
         this.gsmSCFAddress = gsmSCFAddress;

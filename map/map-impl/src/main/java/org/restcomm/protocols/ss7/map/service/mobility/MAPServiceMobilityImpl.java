@@ -70,6 +70,8 @@ import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.Any
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeInterrogationResponseImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeSubscriptionInterrogationRequestImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeSubscriptionInterrogationResponseImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeModificationRequestImpl;
+import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.AnyTimeModificationResponseImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.ProvideSubscriberInfoRequestImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberInformation.ProvideSubscriberInfoResponseImpl;
 import org.restcomm.protocols.ss7.map.service.mobility.subscriberManagement.DeleteSubscriberDataRequestImpl;
@@ -446,6 +448,17 @@ public class MAPServiceMobilityImpl extends MAPServiceBaseImpl implements MAPSer
                                 compType == ComponentType.ReturnResult);
                 }
                 break;
+            case MAPOperationCode.anyTimeModification:
+// DANIEL ... validate this
+                if (acn == MAPApplicationContextName.anyTimeInfoHandlingContext) {
+                    if (compType == ComponentType.Invoke)
+                        this.processAnyTimeModificationRequest(parameter, mapDialogMobilityImpl, invokeId);
+                    else
+                        this.processAnyTimeModificationResponse(parameter, mapDialogMobilityImpl, invokeId,
+                                compType == ComponentType.ReturnResult);
+                }
+                break;
+
             case MAPOperationCode.provideSubscriberInfo:
                 if (acn == MAPApplicationContextName.subscriberInfoEnquiryContext) {
                     if (compType == ComponentType.Invoke)
@@ -1255,6 +1268,16 @@ public class MAPServiceMobilityImpl extends MAPServiceBaseImpl implements MAPSer
                 loger.error("Error processing AnyTimeSubscriptionInterrogationResponseIndication: " + e.getMessage(), e);
             }
         }
+    }
+
+    private void processAnyTimeModificationRequest(Parameter parameter, MAPDialogMobilityImpl mapDialogImpl, Long invokeId)
+            throws MAPParsingComponentException {
+        // DANIEL ... fill this in
+    }
+
+    private void processAnyTimeModificationResponse(Parameter parameter, MAPDialogMobilityImpl mapDialogImpl,
+            Long invokeId, boolean returnResultNotLast) throws MAPParsingComponentException {
+        // DANIEL ... fill this in
     }
 
     private void processProvideSubscriberInfoRequest(Parameter parameter, MAPDialogMobilityImpl mapDialogImpl, Long invokeId)

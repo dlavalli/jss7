@@ -709,6 +709,8 @@ public interface MAPParameterFactory {
     AnyTimeInterrogationResponse createAnyTimeInterrogationResponse(SubscriberInfo subscriberInfo,
             MAPExtensionContainer extensionContainer);
 
+    // DANIEL ... Add anything here ???
+
     DiameterIdentity createDiameterIdentity(byte[] data);
 
     SubscriberIdentity createSubscriberIdentity(IMSI imsi);
